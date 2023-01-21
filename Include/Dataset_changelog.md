@@ -1,6 +1,57 @@
 # FakeYou Dataset toolkit changelog
 
-This is the dataset management UDF changelog for fakeYou.
+This is the dataset management UDF changelog for [fakeYou](https://fakeyou.com/).
+
+## 0.6.0
+
+Many changes and improvements have been made in this version:
+
+* Added _dataset_open_transcription
+	* Now, this is the function that will open the transcripts (lists) compatible with Tacotron 2 instead of FileRead or similar.
+		* This is done to reduce code.
+		* However, all functions that require opening a list must adapt to this new function.
+	* The lists opened by the user with this function will be presented in a 2d array. It is what this function returns if there are no problems.
+* added _Dataset_txt2Lab:
+	* This function converts a transcript (tacotron 2) to lab files (label)
+		* In this case, the path of the transcript should be assigned, but also the path of the converted lab files.
+	* Warning: in some cases, the .lab files are required in the path where the wav files are, for this you must assign the path where the wavs are.
+	* Warning 2: lab files will be created depending on the number of audios. Each .lab file has a single audio transcript.
+* updated _changeDatasetOrder
+	* Removed some unused variables
+	* The geting transcripts has been changed to _dataset_open_transcription
+* updated _AhoTtsDataset2Tacotron
+	* Now it is detected if there are no audio files, to only convert the transcript.
+	* FileFind*file call removed
+	* Added @error to 4 when converting audios and transcripts do not match the number of items.
+* updated _DatasetFixList:
+	* Added parameter, $bConsole. This means that any messages or progress will be displayed in the console while the work is being done.
+	* Changed the "es" value of $sLang to replace it with "old_es" and change "es" to the new Spanish symbol support.
+		* Unlike the old one, the "ñ" are no longer changed to "ni"; however, "()" symbols are removed, as they are now supported.
+	* Removed some unused variables
+	* The geting transcripts has been changed to _dataset_open_transcription
+	* Changed the way you save the converted file. Now you do it from _ArrayToString, remember that the transcript is now working on a 2d array.
+* Updated _Dataset_get_WavsDuration:
+	* Added new parameters
+		* $sSecondRange: this is the range of seconds (minimum and maximum) that will be allowed. If an audio reaches the minimum or maximum, it warns you.
+		* $bResults: a boolean to indicate if the function returns an array with the results, or if it is false, it only returns a string with the total time.
+		* $bConsole: This means that messages or progress will be displayed in the console while the work is being done.
+	* FileFind*file call removed
+* updated _Dataset_CreateTranscription:
+	* Added parameter, $bConsole. This means that any messages or progress will be displayed in the console while the work is being done.
+* updated _dataset_matchList:
+	* The geting transcripts has been changed to _dataset_open_transcription
+	* Added support for tacotron 2 multispeaker transcripts
+		* Therefore, the $bSpeaker parameter were added, this parameter is used to indicate that the list should support the speaker ID parameter.
+		* Also added $nSpeaker (default 0) this is the speaker id used for transcrypts.
+
+### internal
+* Added new support for displaying progress bars in the console
+	* This fixes a lot of bugs with functions that required $bConsole, progress was displayed with too many decimals. We use round() instead.
+	* Functions that require $bConsole should use _PrintProgress
+* Updated __Dataset_GetAudioDuration:
+	* Added parameters:
+		* $iMinSeconds: This will also identify the minimum duration that is allowed on each audio. If an audio is less than the minimum duration, it warns to the user.
+		* $bConsole: This will display warnings on the console, such as duration reached
 
 ## 0.5.0
 
@@ -20,13 +71,18 @@ This is the dataset management UDF changelog for fakeYou.
 	* added more symbols to replace like ()
 	* Added the ability to search for end punctuation. If it doesn't exist, it will add it.
 * updated _changeDatasetOrder
-	* added a fourth parameter, $bShowMSG. This means that messages or progress will be displayed in the console while the work is being done.
+	* added a fourth parameter, $bConsole. This means that messages or progress will be displayed in the console while the work is being done.
 	* FileFind*file call removed
 * Updated _AhoTtsDataset2Tacotron
-	* Added a third parameter, $bShowMSG. This means that any messages or progress will be displayed in the console while the work is being done.
+	* Added $iMode parameter. There are two types of transcripts in AhoTts.
+	* Added parameter, $bConsole. This means that any messages or progress will be displayed in the console while the work is being done.
 * updated _Dataset_checkStatus
 	* added more rating values to get the status of the dataset.
-
+* updated _Dataset_CleanFiles
+	* Added parameter, $bConsole. This means that any messages or progress will be displayed in the console while the work is being done.
+	* Added two more modes:
+		* 3 = unity (*.meta)
+		* 4 = prosodylab files (*.lab files).
 
 ## 0.4.0
 

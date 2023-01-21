@@ -1,4 +1,4 @@
-#include "include\fakeYou2.au3"
+#include "include\fakeYou.au3"
 _Example()
 Func _Example()
 	;Local $aVoices = _FakeYouGetVoicesList()

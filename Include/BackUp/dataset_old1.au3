@@ -22,29 +22,29 @@ $sFakeYouDatasetManager_Ver = "0.6.0"
 ; Link ..........:
 ; Example .......: Yes
 ; ===============================================================================================================================
-Func _changeDatasetOrder($sPath, $sListFileName, $nNum, $bConsole = False)
-	Local $aFilesList, $aFile, $aTexts[]
-	Local $iLines, $iResult = 0
+Func _changeDatasetOrder($sPath, $sListFileName, $nNum, $bConsole = false)
+	local $aFilesList, $aFile, $aTexts[]
+	local $iLines, $iResult = 0
 	Local $sFileName = ""
-	$aFilesList = _FileListToArrayRec($sPath & "\wavs", "*.wav", 1, 0, 2)
+	$aFilesList = _FileListToArrayRec($sPath &"\wavs", "*.wav", 1, 0, 2)
 	If @error Then Return SetError(1, 0, "")
-	$aFile = _dataset_open_transcription($sListFileName)
-	$iLines = UBound($aFile, 1)
+	$aFile = _dataset_open_transcription($sPath & "\" & $sListFileName)
+	$iLines = uBound($aFile, 1)
 	If @error Then Return SetError(2, 0, "")
-	If $bConsole Then ConsoleWrite("Phase 1: split the transcript." & @CRLF)
+	if $bConsole then ConsoleWrite("Phase 1: split the transcript." &@crlf)
 	For $i = 0 To $iLines - 1
 		$aTexts[$i] = $aFile[$i][1]
-		If $bConsole Then _PrintProgress($i + 1, $iLines)
+		if $bConsole then _PrintProgress($i+1, $iLine)
 	Next
-	$hFileOpen = FileOpen(StringTrimRight($sListFileName, 4) & "_converted.txt", 1)
+	$hFileOpen = FileOpen($sPath & "\" & StringTrimRight($sListFileName, 4) & "_converted.txt", 1)
 	If $hFileOpen = -1 Then Return SetError(3, 0, "")
 	Local $nItem = 0
-	_ArraySortEx($aFilesList, Default, 1, Default, Default, 1)
+	_ArraySortEx($aFileslist, Default, 1, Default, Default, 1)
 	If @error Then Return SetError(4, 0, "")
-	If $bConsole Then ConsoleWrite("Phase 2: rename files and change list." & @CRLF)
-	For $IProcess = 1 To $aFilesList[0]
-		If $bConsole Then _PrintProgress($IProcess, $aFilesList[0])
-		FileMove($sPath & "\wavs\" & $aFilesList[$IProcess], $sPath & "\wavs\" & $nNum & ".wav", $FC_OVERWRITE)
+	if $bConsole then ConsoleWrite("Phase 2: rename files and change list." &@crlf)
+	For $IProcess = 1 To $aFileslist[0]
+		if $bConsole then _PrintProgress($iProcess, $aFileslist[0])
+		FileMove($sPath & "\wavs\" & $aFileslist[$IProcess], $sPath & "\wavs\" & $nNum & ".wav", $FC_OVERWRITE)
 		FileWriteLine($hFileOpen, "wavs/" & $nNum & ".wav|" & $aTexts[$nItem])
 		$nItem = $nItem + 1
 		$nNum = $nNum + 1
@@ -67,13 +67,13 @@ EndFunc   ;==>_changeDatasetOrder
 ; Link ..........:
 ; Example .......: Yes
 ; ===============================================================================================================================
-Func _AhoTtsDataset2Tacotron($sPath, $sListFileName = "list.txt", $iMode = 1, $bConsole = False)
-	Local $aFilesList[]
-	Local $bListOnly = False
+Func _AhoTtsDataset2Tacotron($sPath, $sListFileName = "list.txt", $iMode = 1, $bConsole = false)
+	local $aFileslist[]
+	local $bListOnly = false
 	Local $sFilesList = "", $sText = ""
-	$aFilesList = _FileListToArrayRec($sPath, "*.wav", 1, 0, 2)
-	If @error Then
-		$bListOnly = True
+	$aFileslist = _FileListToArrayRec($sPath, "*.wav", 1, 0, 2)
+	if @error then
+		$bListOnly = true
 	ElseIf Not FileExists($sListFileName) Then
 		Return SetError(1, 0, "")
 	EndIf
@@ -83,18 +83,18 @@ Func _AhoTtsDataset2Tacotron($sPath, $sListFileName = "list.txt", $iMode = 1, $b
 	$hFileOpen = FileOpen($sPath & "\" & StringTrimRight($sListFileName, 4) & "_converted.txt", 1)
 	If $hFileOpen = -1 Then Return SetError(3, 0, "")
 	Local $nNum = 1
-	If Not $bListOnly Then
+	if not $bListOnly then
 		If Not FileExists($sPath & "\wavs") Then DirCreate($sPath & "\wavs")
-		If Not $aFilesList[0] = $iLines Then Return SetError(4, 0, "")
+		if not $aFileslist[0] = $iLines then Return SetError(4, 0, "")
 	EndIf
-	For $IProcess = 1 To $aFilesList[0]
-		If $bConsole Then _PrintProgress($IProcess, $aFilesList[0])
-		If $iMode = 1 Then
+	For $IProcess = 1 To $aFileslist[0]
+		if $bConsole then _PrintProgress($iProcess, $aFileslist[0])
+		if $iMode = 1 then
 			$sText = $aFile[$IProcess - 1]
-		ElseIf $iMode = 2 Then
-			$sText = StringSplit($aFile[$IProcess - 1], @TAB)[2]
+		elseif $iMode = 2 then
+			$sText = StringSplit($aFile[$IProcess - 1], @tab)[2]
 		EndIf
-		If Not $bListOnly Then FileMove($sPath & "\" & $aFilesList[$IProcess], $sPath & "\wavs\" & $nNum & ".wav", $FC_OVERWRITE)
+		if not $bListOnly then FileMove($sPath & "\" & $aFileslist[$IProcess], $sPath & "\wavs\" & $nNum & ".wav", $FC_OVERWRITE)
 		FileWriteLine($hFileOpen, "wavs/" & $nNum & ".wav|" & $sText)
 		$nNum = $nNum + 1
 		Sleep(10)
@@ -116,54 +116,54 @@ EndFunc   ;==>_AhoTtsDataset2Tacotron
 ; Link ..........:
 ; Example .......: Yes
 ; ===============================================================================================================================
-Func _DatasetFixList($sListPath, $sLang = "en", $bConsole = False)
-	Local $aFile, $aPuncs[] = [",", ".", "¡", "!", "¿", "?", ";", ":"]
-	Local $bPunctuation = False
-	Local $iCount = 0
+Func _DatasetFixList($sListPath, $sLang = "en", $bConsole = false)
+	local $aFile, $aPuncs[] = [",", ".", "-", "¡", "!", "¿", "?", ";", ":"]
+	local $bPunctuation = false
+	local $iCount = 0
 	Local $sReplacements = 0, $sText = ""
 	Switch $sLang
 		Case "en"
-			Local $aSimbols[][2] = [["ñ", "n"], ["1", "one"], ["2", "two"], ["3", "three"], ["4", "four"], ["5", "five"], ["6", "six"], ["7", "seven"], ["8", "eight"], ["9", "nine"], ["0", "zero"], ["...", ","], ["(", ","], [")", "."]]
+			local $aSimbols[][2] = [["ñ", "n"], ["1", "one"], ["2", "two"], ["3", "three"], ["4", "four"], ["5", "five"], ["6", "six"], ["7", "seven"], ["8", "eight"], ["9", "nine"], ["0", "zero"], ["...", ","], ["(", ","], [")", "."]]
 		Case "old_es"
-			Local $aSimbols[][2] = [["ñ", "ni"], ["1", "uno"], ["2", "dos"], ["3", "tres"], ["4", "cuatro"], ["5", "cinco"], ["6", "seis"], ["7", "siete"], ["8", "ocho"], ["9", "nueve"], ["0", "cero"], ["...", ","], ["(", ","], [")", "."]]
+			local $aSimbols[][2] = [["ñ", "ni"], ["1", "uno"], ["2", "dos"], ["3", "tres"], ["4", "cuatro"], ["5", "cinco"], ["6", "seis"], ["7", "siete"], ["8", "ocho"], ["9", "nueve"], ["0", "cero"], ["...", ","], ["(", ","], [")", "."]]
 		Case "es"
-			Local $aSimbols[][2] = [["1", "uno"], ["2", "dos"], ["3", "tres"], ["4", "cuatro"], ["5", "cinco"], ["6", "seis"], ["7", "siete"], ["8", "ocho"], ["9", "nueve"], ["0", "cero"], ["...", ","]]
+			local $aSimbols[][2] = [["1", "uno"], ["2", "dos"], ["3", "tres"], ["4", "cuatro"], ["5", "cinco"], ["6", "seis"], ["7", "siete"], ["8", "ocho"], ["9", "nueve"], ["0", "cero"], ["...", ","]]
 	EndSwitch
 	If Not FileExists($sListPath) Then Return SetError(1, 0, "")
 	$aFile = _dataset_open_transcription($sListPath)
 	If @error Then Return SetError(2, 0, "")
 	$hFileOpen = FileOpen(StringTrimRight($sListPath, 4) & "_fixed.txt", 1)
 	If $hFileOpen = -1 Then Return SetError(3, 0, "")
-	$iCount = UBound($aFile, $UBOUND_ROWS)
-	For $i = 0 To UBound($aFile, $UBOUND_ROWS) - 1
-		If $bConsole Then _PrintProgress($i + 1, $iCount)
-		$sText = $aFile[$i][1]
+	$iCount = uBound($aFile, $UBOUND_ROWS)
+	for $I = 0 to uBound($aFile, $UBOUND_ROWS) -1
+		if $bConsole then _PrintProgress($i+1, $iCount)
+		$sText = $aFile[$I][1]
 		For $iStart = 0 To UBound($aSimbols, 1) - 1
 			If StringInStr($sText, $aSimbols[$iStart][0]) Then
 				$sText = StringReplace($sText, $aSimbols[$iStart][0], $aSimbols[$iStart][1])
 				$sReplacements = $sReplacements + @extended
-				If $bConsole Then ConsoleWrite("a match was found in line " & $i & " of " & $iCount & ". Simbol: " & $aSimbols[$iStart][0] & " = " & $aSimbols[$iStart][1] & "." & @CRLF)
+				if $bConsole then ConsoleWrite("a match was found in line " &$I &" of " &$iCount &". Simbol: " &$aSimbols[$iStart][0] &" = " &$aSimbols[$iStart][1] &"." &@crlf)
 			Else
 				ContinueLoop
 			EndIf
 			Sleep(10)
 		Next
 		; check if there is end punctuation.
-		For $iPunc = 0 To UBound($aPuncs) - 1
-			If StringRight($sText, 1) = $aPuncs[$iPunc] Then
-				$bPunctuation = True
-				ExitLoop
+		for $iPunc = 0 to uBound($aPuncs) -1
+			if StringRight($sText, 1) = $aPuncs[$iPunc] then
+				$bPunctuation = true
+				exitLoop
 			Else
-				$bPunctuation = False
+				$bPunctuation = false
 			EndIf
 		Next
-		If Not $bPunctuation Then
-			If $bConsole Then ConsoleWrite("Warning: " & $aFile[$i][1] & " It has no end punctuation. Adding end punctuation..." & @CRLF)
+		if not $bPunctuation then
+			if $bConsole then ConsoleWrite("Warning: " &$aFile[$I][1] &" It has no end punctuation. Adding end punctuation..." &@crlf)
 			$sText &= "."
-			$bPunctuation = True
+			$bPunctuation = true
 		EndIf
-		$aFile[$i][1] = $sText
-	Next
+		$aFile[$I][1] = $sText
+	next
 	FileWrite($hFileOpen, _ArrayToString($aFile, "|"))
 	FileClose($hFileOpen)
 	SetExtended($sReplacements)
@@ -181,24 +181,24 @@ EndFunc   ;==>_DatasetFixList
 ; Link ..........:
 ; Example .......: No
 ; ===============================================================================================================================
-Func _Dataset_get_WavsDuration($sWavsPath = @ScriptDir & "\wavs", $sListPath = @ScriptDir & "\list.txt", $iMode = 1, $sSecondRange = "5-15", $bResults = True, $bConsole = False)
+Func _Dataset_get_WavsDuration($sWavsPath = @ScriptDir & "\wavs", $sListPath = @ScriptDir & "\list.txt", $iMode = 1, $sSecondRange = "5-15", $bResults = True, $bConsole = false)
 	Local $aList, $aFilesList, $aDurations, $aRange
 	Local $iResult = 0, $iLines = 0, $iSecs, $iHours, $iMins, $iSecs2
-	Local $sFileName = ""
+	local $sFileName = ""
 	If $iMode = 1 Then
 		If Not FileExists($sWavsPath) Then Return SetError(1, 0, "")
 		$aFilesList = _FileListToArrayRec($sWavsPath, "*.wav", 1, 0, 2)
 		If @error Then Return SetError(2, 0, "")
 		$aRange = StringSplit($sSecondRange, "-")
-		For $i = 1 To $aFilesList[0]
-			If $bConsole Then ConsoleWrite("Checking " & $aFilesList[$i] & "... ")
-			$aDurations[$i - 1] = __Dataset_GetAudioDuration($sWavsPath & "\" & $aFilesList[$i], $aRange[1], $aRange[2], $bConsole)
-			$iResult = $iResult + $aDurations[$i - 1]
+		for $I = 1 to $aFilesList[0]
+			if $bConsole then ConsoleWrite("Checking " &$aFilesList[$I] &"... ")
+			$aDurations[$i-1] = __Dataset_GetAudioDuration($sWavsPath & "\" & $aFilesList[$I], $aRange[1], $aRange[2], $bConsole)
+			$iResult = $iResult + $aDurations[$i-1]
 			If @error Then
 				Return SetError(3, 0, "")
 				ExitLoop
 			EndIf
-			If $bConsole Then ConsoleWrite("Done." & @CRLF)
+			if $bConsole then consoleWrite("Done." &@crlf)
 			Sleep(10)
 		Next
 	ElseIf $iMode = 2 Then
@@ -206,7 +206,7 @@ Func _Dataset_get_WavsDuration($sWavsPath = @ScriptDir & "\wavs", $sListPath = @
 		If Not FileExists($sListPath) Then Return SetError(1, 0, "")
 		$aList = _dataset_open_transcription($sListPath)
 		If @error Then Return SetError(2, 0, "")
-		$iLines = UBound($aList, 1)
+		$iLines = uBound($aList, 1)
 		For $i = 0 To $iLines - 1
 			$iResult = $iResult + $aList[$i][3]
 		Next
@@ -220,10 +220,10 @@ Func _Dataset_get_WavsDuration($sWavsPath = @ScriptDir & "\wavs", $sListPath = @
 	$iSecs = Mod($iSecs, 3600)
 	$iMins = Int($iSecs / 60)
 	$iSecs2 = Round(Mod($iSecs, 60))
-	If Not $bResults Then
+	if not $bResults then
 		Return $iHours & ":" & $iMins & ":" & $iSecs2
 	Else
-		Local $aResults[3] = [$iHours & ":" & $iMins & ":" & $iSecs2, _ArrayMin($aDurations, 0, 1), _ArrayMax($aDurations, 0, 1)]
+		local $aResults[3] = [$iHours & ":" & $iMins & ":" & $iSecs2, _ArrayMin($aDurations, 0, 1), _ArrayMax($aDurations, 0, 1)]
 	EndIf
 EndFunc   ;==>_Dataset_get_WavsDuration
 ; #INTERNAL_USE_ONLY# ===========================================================================================================
@@ -240,16 +240,16 @@ EndFunc   ;==>_Dataset_get_WavsDuration
 ; Link ..........:
 ; Example .......: No
 ; ===============================================================================================================================
-Func __Dataset_GetAudioDuration($sFile, $iMinSeconds = 2, $iMaxSeconds = 20, $bConsole = False)
-	Local $aSound
+Func __Dataset_GetAudioDuration($sFile, $iMinSeconds = 2, $iMaxSeconds = 20, $bConsole = false)
+	local $aSound
 	$aSound = _SoundOpen($sFile)
 	If @error Then Return SetError(1, 0, "")
 	$sLenght = _SoundLength($aSound, 2)
 	$aLenghtFormat = StringSplit(_SoundLength($aSound, 1), ":")
 	If $aLenghtFormat[3] <= $iMinSeconds Then
-		If $bConsole Then ConsoleWrite("Warning: the duration of " & $sFile & " It lasts smaller than " & $aLenghtFormat[3] & @CRLF)
+		if $bConsole then ConsoleWrite("Warning: the duration of " & $sFile & " It lasts smaller than " & $aLenghtFormat[3] & @CRLF)
 	ElseIf $aLenghtFormat[3] >= $iMaxSeconds Then
-		If $bConsole Then ConsoleWrite("Warning: the duration of " & $sFile & " It lasts longer than " & $aLenghtFormat[3] & @CRLF)
+		if $bConsole then ConsoleWrite("Warning: the duration of " & $sFile & " It lasts longer than " & $aLenghtFormat[3] & @CRLF)
 	EndIf
 	Return $sLenght
 EndFunc   ;==>__Dataset_GetAudioDuration
@@ -268,7 +268,7 @@ EndFunc   ;==>__Dataset_GetAudioDuration
 ; Link ..........: https://www.autoitscript.com/forum/topic/208426-the-_array-functions-do-not-work-in-these-cases/
 ; Example .......: Yes
 ; ===============================================================================================================================
-Func _Dataset_CreateTranscription($sFileName, $iMaxItems, $sWavsPath = @ScriptDir & "\wavs", $bConsole = False)
+Func _Dataset_CreateTranscription($sFileName, $iMaxItems, $sWavsPath = @ScriptDir & "\wavs", $bConsole = false)
 	If FileExists($sFileName) Then Return SetError(1, 0, "") ;The transcript file already exists.
 	Local $hFile = FileOpen($sFileName, 2)
 	If $hFile = -1 Then Return SetError(2, 0, "") ;the transcription file could not be created.
@@ -283,7 +283,7 @@ Func _Dataset_CreateTranscription($sFileName, $iMaxItems, $sWavsPath = @ScriptDi
 	Else
 		If Not IsInt($iMaxItems) Then Return SetError(5, 0, "") ;The maximum number of elements is not an integer.
 		For $i = 1 To $iMaxItems
-			If $bConsole Then _PrintProgress($i + 1, $iMaxItems)
+			if $bConsole then _PrintProgress($i+1, $iMaxItems)
 			FileWriteLine($hFile, "wavs/" & $i & ".wav|")
 		Next
 		FileClose($hFile)
@@ -307,7 +307,7 @@ EndFunc   ;==>_Dataset_CreateTranscription
 ; Link ..........:
 ; Example .......: No
 ; ===============================================================================================================================
-Func _Dataset_CleanFiles($sWavsPath, $iMode, $sSearch = "HP2-4BAND-3090_4band_arch-500m_1|HP2-4BAND-3090_4band_arch-500m_1_DeepExtraction", $BRemoveVocals = False, $bConsole = False)
+Func _Dataset_CleanFiles($sWavsPath, $iMode, $sSearch = "HP2-4BAND-3090_4band_arch-500m_1|HP2-4BAND-3090_4band_arch-500m_1_DeepExtraction", $BRemoveVocals = False, $bConsole = false)
 	Local $aSearches, $bMultiSearch = False
 	Local $aVRTipes[2] = ["instruments", "vocals"]
 	Local $aFileList = _FileListToArrayRec($sWavsPath, "*.wav", 1, 0, 2)
@@ -317,14 +317,14 @@ Func _Dataset_CleanFiles($sWavsPath, $iMode, $sSearch = "HP2-4BAND-3090_4band_ar
 	;If @error Then Return SetError(2, 0, "")
 	Local $sFileName = "", $sOldName = "", $sNewName = "", $aFileParts[]
 	If $bMultiSearch Then $aSearches = StringSplit($sSearch, "|")
-	If $bConsole Then ConsoleWrite("Cleaning files..." & @CRLF)
+	if $bConsole then ConsoleWrite("Cleaning files..." &@crlf)
 	For $i = 1 To $aFileList[0]
 		Switch $iMode
 			Case 1 ; melodyne
 				$aFileParts = StringSplit($aFileList[$i], ".")
 				$sNewName = $aFileParts[1] & $aFileParts[3]
 				;if FileExists($sWavsPath & "\" &$sNewName) then FileDelete($sWavsPath & "\wavs\" &$sNewName)
-				If $bConsole Then ConsoleWrite("replace original file " & $sWavsPath & "\" & $aFileList[$i] & " to " & $sWavsPath & "\" & $sNewName & @CRLF)
+				if $bConsole then ConsoleWrite("replace original file " &$sWavsPath & "\" & $aFileList[$i] &" to " &$sWavsPath & "\" & $sNewName &@crlf)
 				FileMove($sWavsPath & "\" & $aFileList[$i], $sWavsPath & "\" & $sNewName, $FC_OVERWRITE)
 			Case 2 ; vocal remover
 				If FileExists($sWavsPath & "\.gitkeep") Then FileDelete($sWavsPath & "\.gitkeep")
@@ -346,16 +346,16 @@ Func _Dataset_CleanFiles($sWavsPath, $iMode, $sSearch = "HP2-4BAND-3090_4band_ar
 						If FileExists($sOldName) Then FileDelete($sOldName)
 					EndIf
 				EndIf
-			Case 3 ; unity:
-				$sMetaFileName = $sWavsPath & "\" & $aFileList[$i] & ".meta"
-				If FileExists($sMetaFileName) Then
-					If $bConsole Then ConsoleWrite("deleting: " & $sMetaFileName & @CRLF)
+			case 3 ; unity:
+				$sMetaFileName = $sWavsPath &"\" &$aFileList[$i] &".meta"
+				if FileExists($sMetaFileName) then
+					if $bConsole then ConsoleWrite("deleting: " &$sMetaFileName &@crlf)
 					FileDelete($sMetaFileName)
 				EndIf
-			Case 4 ; prosodylab:
-				$sMetaFileName = $sWavsPath & "\" & StringTrimRight($aFileList[$i], 4) & ".lab"
-				If FileExists($sMetaFileName) Then
-					If $bConsole Then ConsoleWrite("deleting: " & $sMetaFileName & @CRLF)
+			case 4 ; prosodylab:
+				$sMetaFileName = $sWavsPath &"\" &StringTrimRight($aFileList[$i], 4) &".lab"
+				if FileExists($sMetaFileName) then
+					if $bConsole then ConsoleWrite("deleting: " &$sMetaFileName &@crlf)
 					FileDelete($sMetaFileName)
 				EndIf
 		EndSwitch
@@ -375,21 +375,21 @@ EndFunc   ;==>_Dataset_CleanFiles
 ; Link ..........:
 ; Example .......: No
 ; ===============================================================================================================================
-Func _dataset_open_transcription($sListPath)
-	Local $aFile
-	If Not FileExists($sListPath) Then Return SetError(1, 0, "")
-	$aFile = FileReadToArray($sListPath)
-	If @error Then Return SetError(2, 0, "")
-	$iColumns = StringSplit($aFile[0], "|")[0]
-	If Not $iColumns > 2 Then Return SetError(3, 0, "")
-	Local $aSplit[UBound($aFile)][$iColumns]
-	For $i = 0 To UBound($aFile) - 1
-		For $j = 0 To $iColumns - 1
-			$aSplit[$i][$j] = StringSplit($aFile[$i], "|")[$j + 1]
-		Next
-	Next
-	Return $aSplit
-EndFunc   ;==>_dataset_open_transcription
+func _dataset_open_transcription($sListPath)
+local $aFile
+if not FileExists($sListPath) then return setError(1, 0, "")
+$aFile = FileReadToArray($sListPath)
+If @error Then Return SetError(2, 0, "")
+$iColumns = StringSplit($aFile[0], "|")[0]
+if not $iColumns > 2 then Return SetError(3, 0, "")
+local $aSplit[uBound($aFile)][$iColumns]
+For $i = 0 To UBound($aFile) -1
+for $j = 0 to $iColumns -1
+$aSplit[$I][$j] = StringSplit($aFile[$I], "|")[$j+1]
+Next
+Next
+return $aSplit
+EndFunc
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: _Dataset_Set_listWavsNames
 ; Description ...:
@@ -480,34 +480,20 @@ Func _Dataset_npy2wav($sFilePath)
 	FileClose($hFile)
 	Return $nRepl
 EndFunc   ;==>_Dataset_npy2wav
-; #FUNCTION# ====================================================================================================================
-; Name ..........: _Dataset_txt2Lab
-; Description ...:
-; Syntax ........: _Dataset_txt2Lab($sListPath, $sConvertedPath)
-; Parameters ....: $sListPath           - a string value.
-;                  $sConvertedPath      - a string value.
-; Return values .: None
-; Author ........: Your Name
-; Modified ......:
-; Remarks .......:
-; Related .......:
-; Link ..........:
-; Example .......: No
-; ===============================================================================================================================
-Func _Dataset_txt2Lab($sListPath, $sConvertedPath)
-	If Not FileExists($sListPath) Then Return SetError(1, 0, "")
-	$aList = FileReadToArray($sListPath)
-	If @error Then Return SetError(2, 0, "")
-	$iLines = @extended
-	If Not FileExists($sConvertedPath) Then DirCreate($sConvertedPath)
-	For $i = 0 To $iLines - 1
-		$hFile = FileOpen($sConvertedPath & "\" & $i + 1 & ".lab", $FO_APPEND)
-		If $hFile = -1 Then Return SetError(3, 0, "")
-		FileWrite($hFile, StringSplit($aList[$i], "|")[2])
-		FileClose($hFile)
-	Next
-	Return 1
-EndFunc   ;==>_Dataset_txt2Lab
+func _Dataset_txt2Lab($sListPath, $sConvertedPath)
+If Not FileExists($sListPath) Then Return SetError(1, 0, "")
+$aList = FileReadToArray($sListPath)
+If @error Then Return SetError(2, 0, "")
+$iLines = @extended
+if not FileExists($sConvertedPath) then DirCreate($sConvertedPath)
+For $i = 0 To $iLines - 1
+$hFile = FileOpen($sConvertedPath &"\" &$i+1 &".lab", $FO_APPEND)
+If $hFile = -1 Then Return SetError(3, 0, "")
+FileWrite($hFile, StringSplit($aList[$i], "|")[2])
+FileClose($hFile)
+Next
+Return 1
+EndFunc
 ; #FUNCTION# ====================================================================================================================
 ; Name ..........: _Dataset_checkStatus
 ; Description ...:
@@ -523,7 +509,7 @@ EndFunc   ;==>_Dataset_txt2Lab
 ; ===============================================================================================================================
 Func _Dataset_checkStatus($sPath)
 	Local $aTime[]
-	$sStatus = _Dataset_get_WavsDuration($sPath & "\wavs")
+	$sStatus = _Dataset_Get_WavsDuration($sPath & "\wavs")
 	If @error Then Return SetError(1, 0, "")
 	$aTime = StringSplit($sStatus, ":")
 	If $aTime[1] = 0 Then
@@ -541,11 +527,11 @@ Func _Dataset_checkStatus($sPath)
 			Case 46 To 59
 				Return 6
 		EndSwitch
-	ElseIf $aTime[1] = 1 Or $aTime[1] = 2 Or $aTime[1] = 3 Or $aTime[1] = 4 Or $aTime[1] = 5 Then
+	ElseIf $aTime[1] = 1 or $aTime[1] = 2 or $aTime[1] = 3 or $aTime[1] = 4 or $aTime[1] = 5 Then
 		Return 7
-	ElseIf $aTime[1] = 6 Or $aTime[1] = 7 Or $aTime[1] = 8 Then
+	ElseIf $aTime[1] = 6 or $aTime[1] = 7 or $aTime[1] = 8 Then
 		Return 8
-	ElseIf $aTime[1] = 9 Or $aTime[1] = 10 Or $aTime[1] = 11 Or $aTime[1] = 12 Then
+	ElseIf $aTime[1] = 9 or $aTime[1] = 10 or $aTime[1] = 11 or $aTime[1] = 12 Then
 		Return 9
 	EndIf
 EndFunc   ;==>_Dataset_checkStatus
@@ -562,44 +548,44 @@ EndFunc   ;==>_Dataset_checkStatus
 ; Link ..........:
 ; Example .......: Yes
 ; ===============================================================================================================================
-Func _dataset_matchList($sListPath = @ScriptDir & "\list.txt", $bSpeaker = False, $nSpeaker = 0, $bConsole = False)
+Func _dataset_matchList($sListPath = @ScriptDir & "\list.txt", $bSpeaker = false, $nSpeaker = 0, $bConsole = false)
 	;declare:
 	Local $aList
-	Local $hFile
-	Local $iLines, $iColumns
-	Local $sFinalTranscription
+	local $hFile
+	local $iLines, $iColumns
+	local $sFinalTranscription
 	If Not FileExists($sListPath) Then Return SetError(1, 0, "")
 	; open list:
 	$aList = _dataset_open_transcription($sListPath)
 	If @error Then Return SetError(2, 0, "")
 	; getting number of lines.
-	$iLines = UBound($aList, 1)
-	$iColumns = UBound($aList, 2)
+	$iLines = uBound($aList, 1)
+	$iColumns = uBound($aList, 2)
 	$hFile = FileOpen(StringTrimRight($sListPath, 4) & "_converted.txt", $FO_APPEND)
 	If $hFile = -1 Then Return SetError(3, 0, "")
 	For $i = 0 To $iLines - 1
-		If $bConsole Then _PrintProgress($i + 1, $iLines)
+		if $bConsole then _PrintProgress($i+1, $iLines)
 		; Example of splitted text:
 		; $aList[0][0]: bailen/bailen_0000.wav
 		; $aList[0][1]: Inés, confusa y ruborosa, no contestó nada, cuando el diplomático se fue derecho a ella llevando de la mano a D. Diego, y le dijo:
 		; $aList[0][2]: Inés, confusa y ruborosa, no contestó nada, cuando el diplomático se fue derecho a ella llevando de la mano a Don Diego, y le dijo:
 		; $aList[0][3]: 7.71
 		; we only need the 0 and 2, so we do the following:
-		If Not $bSpeaker Then
-			$sFinalTranscription = $aList[$i][0] & "|" & $aList[$i][2]
-		Else
-			If IsNumber($nSpeaker) Then
-				If $iColumns = 2 Then
-					$sFinalTranscription = $aList[$i][0] & "|" & $aList[$i][1] & "|" & $nSpeaker
-				ElseIf $iColumns = 4 Then
-					$sFinalTranscription = $aList[$i][0] & "|" & $aList[$i][2] & "|" & $nSpeaker
+		if not $bSpeaker then
+			$sFinalTranscription = $aList[$I][0] & "|" & $aList[$I][2]
+		else
+			if isNumber($nSpeaker) then
+				if $iColumns = 2 then
+					$sFinalTranscription = $aList[$i][0] &"|" &$aList[$i][1] &"|" &$nSpeaker
+				Elseif $iColumns = 4 then
+					$sFinalTranscription = $aList[$I][0] & "|" & $aList[$I][2] &"|" &$nSpeaker
 				Else
-					Return SetError(4, 0, "")
+					return SetError(4, 0, "")
 				EndIf
 			Else
-				Return SetError(5, 0, "")
+				return SetError(5, 0, "")
 			EndIf
-		EndIf
+		endIf
 		FileWriteLine($hFile, $sFinalTranscription)
 	Next
 	FileClose($hFile)
@@ -628,24 +614,6 @@ Func __SortList(ByRef $_aSortList)
 	If @error Then SetError(2, 0, "")
 EndFunc   ;==>__SortList
 
-; #FUNCTION# ====================================================================================================================
-; Name ..........: _ArraySortEx
-; Description ...:
-; Syntax ........: _ArraySortEx(Byref $aArray[, $iDescending = 0[, $iStart = 0[, $iEnd = 0[, $iSubItem = 0[, $iType = 2]]]]])
-; Parameters ....: $aArray              - [in/out] an array of unknowns.
-;                  $iDescending         - [optional] an integer value. Default is 0.
-;                  $iStart              - [optional] an integer value. Default is 0.
-;                  $iEnd                - [optional] an integer value. Default is 0.
-;                  $iSubItem            - [optional] an integer value. Default is 0.
-;                  $iType               - [optional] an integer value. Default is 2.
-; Return values .: None
-; Author ........: Your Name
-; Modified ......:
-; Remarks .......:
-; Related .......:
-; Link ..........:
-; Example .......: No
-; ===============================================================================================================================
 Func _ArraySortEx(ByRef $aArray, $iDescending = 0, $iStart = 0, $iEnd = 0, $iSubItem = 0, $iType = 2)
 	If $iDescending = Default Then $iDescending = 0
 	If $iStart = Default Then $iStart = 0

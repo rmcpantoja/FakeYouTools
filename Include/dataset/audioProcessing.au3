@@ -18,7 +18,7 @@
 ; Link ..........:
 ; Example .......: Yes
 ; ===============================================================================================================================
-Func _Dataset_Process_audios($sWavsPath = @ScriptDir & "\wavs", $sEnginesPath = @ScriptDir & "\engines", $bConsole = False)
+Func _Dataset_Process_audios($sWavsPath = @ScriptDir & "\wavs", $sConvertedPath = @ScriptDir & "\processed wavs", $sEnginesPath = @ScriptDir & "\engines", $iFreq = 22050, $bConsole = False)
 	Local $aFiles[]
 	Local $sFfmpegFilename = "", $sSoxFilename = "sox\sox.exe"
 	; check ffmpeg:
@@ -27,7 +27,7 @@ Func _Dataset_Process_audios($sWavsPath = @ScriptDir & "\wavs", $sEnginesPath = 
 	ElseIf @OSArch = "X64" Then
 		$sFfmpegFilename = "ffmpeg64.exe"
 	Else
-		If $bConsole Then ConsoleWriteError("Error: Could not find the ffmpeg path for your architecture. Currently "X86" and " X64" are supported. See the ffmpeg website for more information." & @CRLF)
+		If $bConsole Then ConsoleWriteError('Error: Could not find the ffmpeg path for your architecture. Currently "X86" and " X64" are supported. See the ffmpeg website for more information.' & @CRLF)
 		Return SetError(1, 0, "")
 	EndIf
 	; check if ffmpeg exists:
@@ -49,20 +49,21 @@ Func _Dataset_Process_audios($sWavsPath = @ScriptDir & "\wavs", $sEnginesPath = 
 		If $bConsole Then ConsoleWrite("Processing: " & $sFile & "...")
 		; todo: add a sample rate checker. If it is less than or greater than 22050, as well as if it is not 16 bit, it will homify that audio and process to the next.
 		; convert:
-		__RunFfmpeg($sEnginesPath & "\" & $sFfmpegFilename, '-y -i ' & $sWavsPath & '\' & $sFile & ' -ar 22050 ' & $sWavsPath & '\srtmp.wav -loglevel error')
+		__RunFfmpeg($sEnginesPath & "\" & $sFfmpegFilename, '-y -i ' & $sWavsPath & '\' & $sFile & ' -ar ' &$iFreq &' ' & @ScriptDir & '\cache\srtmp.wav -loglevel error')
 		If @error Then Return SetError(3, 0, "")
 		; normalize audio:
-		__RunSox($sEnginesPath & "\" & $sSoxFilename, $sWavsPath & '\srtmp.wav  -c 1 ' & $sWavsPath & '\ntmp.wav norm -0.1')
+		__RunSox($sEnginesPath & "\" & $sSoxFilename, @ScriptDir & '\cache\srtmp.wav  -c 1 ' & @ScriptDir & '\cache\ntmp.wav norm -0.1')
 		If @error Then Return SetError(4, 0, "")
 		; remove silences:
-		__RunSox($sEnginesPath & "\" & $sSoxFilename, $sWavsPath & '\ntmp.wav ' & $sWavsPath & '\ctmp.wav silence 1 0.05 0.1% reverse silence 1 0.05 0.1% reverse')
+		__RunSox($sEnginesPath & "\" & $sSoxFilename, @ScriptDir & '\cache\ntmp.wav ' & @ScriptDir & '\cache\ctmp.wav silence 1 0.05 0.1% reverse silence 1 0.05 0.1% reverse')
 		If @error Then Return SetError(5, 0, "")
-		__RunFfmpeg($sEnginesPath & "\" & $sFfmpegFilename, '-y -i ' & $sWavsPath & '\ctmp.wav -c copy -fflags +bitexact -flags:v +bitexact -flags:a +bitexact -ar 22050 ' & $sWavsPath & '\poop.wav -loglevel error')
+		__RunFfmpeg($sEnginesPath & "\" & $sFfmpegFilename, '-y -i ' & @ScriptDir & '\cache\ctmp.wav -c copy -fflags +bitexact -flags:v +bitexact -flags:a +bitexact -ar ' &$iFreq &' ' & @ScriptDir & '\cache\poop.wav -loglevel error')
 		If @error Then Return SetError(6, 0, "")
 		FileDelete($sWavsPath & "\" & $sFile)
-		FileMove($sWavsPath & "\poop.wav", $sWavsPath & "\" & $sFile)
+		FileMove(@ScriptDir & "\cache\poop.wav", $sWavsPath & "\" & $sFile)
 		If $bConsole Then ConsoleWrite("Done." & @CRLF)
 	Next
+	FileDelete(@ScriptDir &"\cache\*.wav")
 EndFunc   ;==>_Dataset_Process_audios
 
 ; #INTERNAL_USE_ONLY# ===========================================================================================================
